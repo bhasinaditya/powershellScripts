@@ -1,0 +1,14 @@
+#Connect to Microsoft Graph with required permissions
+Connect-MgGraph -Scopes "User.ReadWrite.All"
+
+# Get users inactive for 90 days
+$inactiveDays = 90
+$users = Get-MgUser -All | Where-Object {
+    $_.SignInActivity.LastSignInDateTime -lt (Get-Date).AddDays(-$inactiveDays)
+}
+
+# Disable inactive accounts and log
+foreach ($user in $users) {
+    Update-MgUser -UserId $user.Id -AccountEnabled $false
+    Write-Output "Disabled user: $($user.UserPrincipalName)"
+}
